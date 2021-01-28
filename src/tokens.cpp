@@ -23,10 +23,10 @@ TokenizeResult Tokenize(std::string text, Verb &verb, std::string &obj_name) {
 	std::vector<std::string> text_vec{std::istream_iterator<std::string>{iss},
 		std::istream_iterator<std::string>{}};
 
-	obj_name = text_vec[1];
-
 	if (text_vec.size() != 2)
 		return text_vec.size() > 2 ? TooManyWords : NotEnoughWords;
+
+	obj_name = text_vec[1];
 
 	if (!TokenizeVerb(text_vec[0], verb))
 		return TokenizeResult::InvalidVerb;
