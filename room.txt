@@ -1,0 +1,7 @@
+obj note
+	name paper
+	description It's made from paper.
+	known 0
+container box
+	description Just a box.
+	content note

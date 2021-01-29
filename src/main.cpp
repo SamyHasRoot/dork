@@ -1,3 +1,5 @@
+#include <fstream>
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -5,19 +7,23 @@
 #include "objects.h"
 #include "room.h"
 
+//#include <sstream>
+//#include <iterator>
+
 int main() {
-	// hardcoded room for now
+	std::ifstream file;
+	file.open("room.txt", std::ios::in);
+	if (!file)
+		// TODO
+		return 1;
+
 	Room room;
-
-	auto box = std::make_shared<Container>(true, "box", "Just a box.");
-
-	auto note = std::make_shared<WorldObj>(false, "note", "It's made of paper.");
-	note->names.push_back("paper");
-
-	box->contents.push_back(note);
-
-	room.objs.push_back(box);
-	room.objs.push_back(note);
+	try {
+		room = Room(std::move(file));
+	} catch (int e) {
+		std::cout << "error on line " << e << "\n";
+		return 1;
+	}
 
 	while (true) {
 		std::string input;

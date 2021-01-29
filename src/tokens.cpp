@@ -21,7 +21,7 @@ TokenizeResult Tokenize(std::string text, Verb &verb, std::string &obj_name) {
 	// split on ' ' (also wtf, c++)
 	std::istringstream iss(text);
 	std::vector<std::string> text_vec{std::istream_iterator<std::string>{iss},
-		std::istream_iterator<std::string>{}};
+	std::istream_iterator<std::string>{}};
 
 	if (text_vec.size() != 2)
 		return text_vec.size() > 2 ? TooManyWords : NotEnoughWords;
