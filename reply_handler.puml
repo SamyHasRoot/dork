@@ -1,0 +1,23 @@
+@startuml
+actor User
+control ReplyHandler
+box "Objects"
+entity box
+end box
+
+box "Box content (also objects)"
+entity cube
+entity monster
+end box
+
+User -> box: OpenAction
+
+box -> cube: ObservationAction
+cube -> ReplyHandler: ObservationReply "A small cube."
+|||
+box -> monster: ObservationAction
+monster -> ReplyHandler: ObservationReply "A monster."
+monster -> ReplyHandler: DeathReply "The monster kills you instantly."
+
+ReplyHandler -> User: "You open the box. It contains:\nA small cube.\nA monster.\n\nThe monster kills you instantly.\nYou died."
+@enduml

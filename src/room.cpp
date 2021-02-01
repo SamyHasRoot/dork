@@ -1,6 +1,7 @@
 #include "room.h"
 #include <fstream>
 #include <map>
+#include <memory>
 
 int Room::SearchFor(std::string name) {
 	for (unsigned int obj_i = 0; obj_i < this->objs.size(); obj_i++) {
@@ -15,8 +16,8 @@ int Room::SearchFor(std::string name) {
 	return -1;
 }
 
-int ReadWord(std::string &input, int start, std::string &out) {
-	int i = start;
+unsigned int ReadWord(std::string &input, int start, std::string &out) {
+	unsigned int i = start;
 	while (input.at(i) != ' ') {
 		out.push_back(input.at(i));
 		i++;
@@ -28,8 +29,8 @@ int ReadWord(std::string &input, int start, std::string &out) {
 
 Room::Room() {};
 
-Room::Room(std::ifstream file) {
-	std::map<std::string, int> name_index;
+Room::Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file) {
+	std::map<std::string, unsigned int> name_index;
 	int line_i = 0;
 	std::string line;
 	while (std::getline(file, line)) {
@@ -41,7 +42,7 @@ Room::Room(std::ifstream file) {
 
 			// read object type
 			std::string type;
-			int type_end = ReadWord(line, 0, type);
+			unsigned int type_end = ReadWord(line, 0, type);
 
 			// check length
 			if (line.length() <= type_end+2)
@@ -49,19 +50,16 @@ Room::Room(std::ifstream file) {
 
 			// read name
 			std::string name;
-			int name_end = ReadWord(line, type_end+2, name);
-
-			// debug
-			std::cout << type << ": " << name << "\n";
+			ReadWord(line, type_end+2, name);
 
 			// add to map
 			name_index[name] = objs.size();
 
 			// add to room
 			if (type == "obj")
-				objs.push_back(std::make_shared<WorldObj>(true, name, ""));
+				objs.push_back(std::make_shared<WorldObj>(reply_handler, true, name, ""));
 			else if (type == "container")
-				objs.push_back(std::make_shared<Container>(true, name, ""));
+				objs.push_back(std::make_shared<Container>(reply_handler, true, name, ""));
 			else
 				throw line_i;
 		} else {
@@ -73,7 +71,7 @@ Room::Room(std::ifstream file) {
 
 			// read property to add
 			std::string property;
-			int property_end = ReadWord(line, 1, property);
+			unsigned int property_end = ReadWord(line, 1, property);
 
 			// TODO: check length
 			// check length
@@ -82,9 +80,6 @@ Room::Room(std::ifstream file) {
 
 			// read value of property to add
 			std::string value = line.substr(property_end+2, line.length()-1);
-
-			// debug
-			std::cout << property << ": " << value << "\n";
 
 			// add property
 			if (property == "name")

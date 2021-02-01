@@ -1,5 +1,7 @@
 #include <fstream>
 #include <string>
+#include <utility>
+#include <variant>
 #include <vector>
 #include <memory>
 
@@ -7,19 +9,42 @@
 #include "objects.h"
 #include "room.h"
 
-//#include <sstream>
-//#include <iterator>
+#include "replies.h"
+
+struct ReplyVisitor {
+	void operator()(const NameReply r) const {
+		std::cout << "A " << r.name << ".\n";
+	}
+	void operator()(const DescribeReply r) const {
+		std::cout << r.description << "\n";
+	}
+	void operator()(const OpenReply r) const {
+		if (r.can_open)
+			std::cout << "You open it and find:\n";
+		else
+			std::cout << "You can't open it.\n";
+	}
+};
+
+void ProcessReplies(std::shared_ptr<ReplyHandler> reply_handler) {
+	while (!reply_handler->replies.empty()) {
+		std::visit(ReplyVisitor(), reply_handler->replies.front());
+		reply_handler->replies.pop();
+	}
+}
 
 int main() {
 	std::ifstream file;
-	file.open("room.txt", std::ios::in);
+	file.open("../room.txt", std::ios::in);
 	if (!file)
 		// TODO
 		return 1;
 
-	Room room;
+	auto reply_handler = std::make_shared<ReplyHandler>();
+
+	auto room = std::shared_ptr<Room>();
 	try {
-		room = Room(std::move(file));
+		room = std::make_shared<Room>(reply_handler, std::move(file));
 	} catch (int e) {
 		std::cout << "error on line " << e << "\n";
 		return 1;
@@ -45,7 +70,7 @@ int main() {
 				continue;
 		}
 
-		int obj_i = room.SearchFor(obj_name);
+		int obj_i = room->SearchFor(obj_name);
 		if (obj_i == -1) {
 			std::cout << "Can't find \"" << obj_name << "\".\n";
 			continue;
@@ -53,19 +78,17 @@ int main() {
 
 		switch (verb) {
 			case Verb::Look:
-				std::cout << room.objs[obj_i]->description << "\n";
+				room->objs[obj_i]->DescribeAction();
 				break;
 			case Verb::Open:
-				if (room.objs[obj_i]->open()) {
-					std::cout << "Opened " << obj_name << ".\n";
-				} else {
-					std::cout << "Can't open " << obj_name << ".\n";
-				}
+				room->objs[obj_i]->OpenAction();
 				break;
 			case Verb::Read:
 				// TODO
 				break;
 		}
+
+		ProcessReplies(reply_handler);
 	}
 
 	return 0;
