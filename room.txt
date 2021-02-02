@@ -1,7 +1,6 @@
-obj note
-	name paper
-	description It's made from paper.
-	known 0
-container box
-	description Just a box.
-	content note
+light light
+	description A light; It appears to be connected to the button.
+	activate_text The light in the corner of the room turns on.
+button button
+	description A big red button; It appears to be connected to the light.
+	connections light

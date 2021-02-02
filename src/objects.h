@@ -23,6 +23,11 @@ class WorldObj {
 
 		virtual void NameAction();
 		virtual void DescribeAction();
+
+		virtual void PushAction();
+		virtual void ButtonPushedAction();
+
+		virtual void TimeStepAction();
 };
 
 class Container: public WorldObj {
@@ -32,6 +37,21 @@ class Container: public WorldObj {
 		void OpenAction() override;
 
 		std::vector<std::shared_ptr<WorldObj>> contents;
+};
+
+class Button: public WorldObj {
+	public:
+		using WorldObj::WorldObj;
+		void PushAction() override;
+
+		std::vector<std::shared_ptr<WorldObj>> connections;
+};
+
+class Light: public WorldObj {
+	public:
+		using WorldObj::WorldObj;
+		std::string activate_text;
+		void ButtonPushedAction() override;
 };
 
 #endif

@@ -60,6 +60,10 @@ Room::Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file) {
 				objs.push_back(std::make_shared<WorldObj>(reply_handler, true, name, ""));
 			else if (type == "container")
 				objs.push_back(std::make_shared<Container>(reply_handler, true, name, ""));
+			else if (type == "button")
+				objs.push_back(std::make_shared<Button>(reply_handler, true, name, ""));
+			else if (type == "light")
+				objs.push_back(std::make_shared<Light>(reply_handler, true, name, ""));
 			else
 				throw line_i;
 		} else {
@@ -88,9 +92,15 @@ Room::Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file) {
 				objs.back()->description = value;
 			else if (property == "known")
 				objs.back()->is_known = (bool)std::stoi(value);
+			else if (property == "activate_text")
+				// TODO: room.objs.back() *must* be a Light
+				std::dynamic_pointer_cast<Light>(objs.back())->activate_text = value;
 			else if (property == "content")
 				// TODO: room.objs.back() *must* be a Container
 				std::dynamic_pointer_cast<Container>(objs.back())->contents.push_back(objs[name_index[value]]);
+			else if (property == "connections")
+				// TODO: room.objs.back() *must* be a Button
+				std::dynamic_pointer_cast<Button>(objs.back())->connections.push_back(objs[name_index[value]]);
 			else
 				throw line_i;
 		}

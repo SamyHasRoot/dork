@@ -6,7 +6,7 @@
 enum Verb {
 	Look,
 	Open,
-	Read,
+	Push,
 };
 
 bool TokenizeVerb(std::string text, Verb &verb);

@@ -13,7 +13,10 @@
 
 struct ReplyVisitor {
 	void operator()(const NameReply r) const {
-		std::cout << "A " << r.name << ".\n";
+		std::cout << "NameReply: " << r.name << "\n";
+	}
+	void operator()(const ContainerOpenedReply r) const {
+		std::cout << r.text << "\n";
 	}
 	void operator()(const DescribeReply r) const {
 		std::cout << r.description << "\n";
@@ -23,6 +26,15 @@ struct ReplyVisitor {
 			std::cout << "You open it and find:\n";
 		else
 			std::cout << "You can't open it.\n";
+	}
+	void operator()(const PushReply r) const {
+		if (r.can_push)
+			std::cout << "You push it.\n";
+		else
+			std::cout << "You can't push it.\n";
+	}
+	void operator()(const EventReply r) const {
+		std::cout << r.text << "\n";
 	}
 };
 
@@ -83,8 +95,8 @@ int main() {
 			case Verb::Open:
 				room->objs[obj_i]->OpenAction();
 				break;
-			case Verb::Read:
-				// TODO
+			case Verb::Push:
+				room->objs[obj_i]->PushAction();
 				break;
 		}
 

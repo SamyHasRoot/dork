@@ -9,8 +9,8 @@ bool TokenizeVerb(std::string text, Verb &verb) {
 		verb = Verb::Look;
 	else if (text == "open")
 		verb = Verb::Open;
-	else if (text == "read")
-		verb = Verb::Read;
+	else if (text == "push")
+		verb = Verb::Push;
 	else
 		return false;
 
