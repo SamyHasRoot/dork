@@ -1,6 +1,0 @@
-light light
-	description A light; It appears to be connected to the button.
-	activate_text The light in the corner of the room turns on.
-button button
-	description A big red button; It appears to be connected to the light.
-	connections light
