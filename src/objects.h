@@ -1,6 +1,9 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
+#include <ios>
+#include <sstream>
+#include <streambuf>
 #include <string>
 #include <vector>
 #include <memory>
@@ -8,8 +11,8 @@
 
 class WorldObj {
 	public:
-		WorldObj(std::shared_ptr<ReplyHandler> reply_handler, bool is_known, std::string name, std::string description);
-		std::shared_ptr<ReplyHandler> reply_handler;
+		WorldObj(ReplyHandler& reply_handler, bool is_known, std::string name, std::string description);
+		ReplyHandler& reply_handler;
 		// names the object can be referred to with
 		std::vector<std::string> names;
 		// whether or not object has been seen*
@@ -21,20 +24,22 @@ class WorldObj {
 		// called when container opens (if object in container)
 		virtual void ContainerOpenedAction();
 
-		virtual void NameAction();
-		virtual void DescribeAction();
+		virtual void LookAction();
 
 		virtual void PushAction();
 		virtual void ButtonPushedAction();
 
 		virtual void TimeStepAction();
+
+		virtual void Save(std::ostringstream& buf);
+		virtual void Load(char*& buf, uint32_t size);
 };
 
 class Container: public WorldObj {
 	public:
 		using WorldObj::WorldObj;
 		// open object
-		void OpenAction() override;
+		virtual void OpenAction() override;
 
 		std::vector<std::shared_ptr<WorldObj>> contents;
 };
@@ -42,7 +47,7 @@ class Container: public WorldObj {
 class Button: public WorldObj {
 	public:
 		using WorldObj::WorldObj;
-		void PushAction() override;
+		virtual void PushAction() override;
 
 		std::vector<std::shared_ptr<WorldObj>> connections;
 };
@@ -51,7 +56,18 @@ class Light: public WorldObj {
 	public:
 		using WorldObj::WorldObj;
 		std::string activate_text;
-		void ButtonPushedAction() override;
+		std::string deactivate_text;
+		bool state = false;
+		virtual void ButtonPushedAction() override;
+		virtual void Save(std::ostringstream& buf) override;
+		virtual void Load(char*& buf, uint32_t size) override;
+};
+
+class StartButton: public Button {
+	public:
+		using Button::Button;
+		std::string next_room;
+		virtual void PushAction() override;
 };
 
 #endif

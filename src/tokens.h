@@ -9,7 +9,7 @@ enum Verb {
 	Push,
 };
 
-bool TokenizeVerb(std::string text, Verb &verb);
+bool TokenizeVerb(std::string& text, Verb& verb);
 
 enum TokenizeResult {
 	Ok,
@@ -18,6 +18,6 @@ enum TokenizeResult {
 	InvalidVerb,
 };
 
-TokenizeResult Tokenize(std::string text, Verb &verb, std::string &obj_name);
+TokenizeResult Tokenize(std::string& text, Verb& verb, std::string& obj_name);
 
 #endif

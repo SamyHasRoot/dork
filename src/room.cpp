@@ -2,8 +2,9 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <string>
 
-int Room::SearchFor(std::string name) {
+int Room::SearchFor(std::string& name) {
 	for (unsigned int obj_i = 0; obj_i < this->objs.size(); obj_i++) {
 		if (this->objs[obj_i]->is_known) {
 			for (std::string obj_name : this->objs[obj_i]->names) {
@@ -16,7 +17,7 @@ int Room::SearchFor(std::string name) {
 	return -1;
 }
 
-unsigned int ReadWord(std::string &input, int start, std::string &out) {
+unsigned int ReadWord(std::string& input, int start, std::string& out) {
 	unsigned int i = start;
 	while (input.at(i) != ' ') {
 		out.push_back(input.at(i));
@@ -29,7 +30,20 @@ unsigned int ReadWord(std::string &input, int start, std::string &out) {
 
 Room::Room() {};
 
-Room::Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file) {
+Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
+	// get room description
+	{
+		std::string line;
+		while (std::getline(file, line)) {
+			if (line == "EOF")
+				break;
+			description.append(line);
+			description.append("\n");
+		}
+		description.pop_back();
+	}
+
+	// load objs
 	std::map<std::string, unsigned int> name_index;
 	int line_i = 0;
 	std::string line;
@@ -64,6 +78,8 @@ Room::Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file) {
 				objs.push_back(std::make_shared<Button>(reply_handler, true, name, ""));
 			else if (type == "light")
 				objs.push_back(std::make_shared<Light>(reply_handler, true, name, ""));
+			else if (type == "start_button")
+				objs.push_back(std::make_shared<StartButton>(reply_handler, true, name, ""));
 			else
 				throw line_i;
 		} else {
@@ -95,12 +111,18 @@ Room::Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file) {
 			else if (property == "activate_text")
 				// TODO: room.objs.back() *must* be a Light
 				std::dynamic_pointer_cast<Light>(objs.back())->activate_text = value;
+			else if (property == "deactivate_text")
+				// TODO: room.objs.back() *must* be a Light
+				std::dynamic_pointer_cast<Light>(objs.back())->deactivate_text = value;
 			else if (property == "content")
 				// TODO: room.objs.back() *must* be a Container
 				std::dynamic_pointer_cast<Container>(objs.back())->contents.push_back(objs[name_index[value]]);
 			else if (property == "connections")
 				// TODO: room.objs.back() *must* be a Button
 				std::dynamic_pointer_cast<Button>(objs.back())->connections.push_back(objs[name_index[value]]);
+			else if (property == "next_room")
+				// TODO: room.objs.back() *must* be a StartButton
+				std::dynamic_pointer_cast<StartButton>(objs.back())->next_room = value;
 			else
 				throw line_i;
 		}

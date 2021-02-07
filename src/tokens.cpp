@@ -4,7 +4,7 @@
 
 #include "tokens.h"
 
-bool TokenizeVerb(std::string text, Verb &verb) {
+bool TokenizeVerb(std::string& text, Verb& verb) {
 	if (text == "look")
 		verb = Verb::Look;
 	else if (text == "open")
@@ -17,7 +17,7 @@ bool TokenizeVerb(std::string text, Verb &verb) {
 	return true;
 }
 
-TokenizeResult Tokenize(std::string text, Verb &verb, std::string &obj_name) {
+TokenizeResult Tokenize(std::string& text, Verb& verb, std::string& obj_name) {
 	// split on ' ' (also wtf, c++)
 	std::istringstream iss(text);
 	std::vector<std::string> text_vec{std::istream_iterator<std::string>{iss},

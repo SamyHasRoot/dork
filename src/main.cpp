@@ -1,66 +1,22 @@
-#include <fstream>
-#include <string>
-#include <utility>
-#include <variant>
-#include <vector>
-#include <memory>
-
 #include "tokens.h"
 #include "objects.h"
 #include "room.h"
 
-#include "replies.h"
-
-struct ReplyVisitor {
-	void operator()(const NameReply r) const {
-		std::cout << "NameReply: " << r.name << "\n";
-	}
-	void operator()(const ContainerOpenedReply r) const {
-		std::cout << r.text << "\n";
-	}
-	void operator()(const DescribeReply r) const {
-		std::cout << r.description << "\n";
-	}
-	void operator()(const OpenReply r) const {
-		if (r.can_open)
-			std::cout << "You open it and find:\n";
-		else
-			std::cout << "You can't open it.\n";
-	}
-	void operator()(const PushReply r) const {
-		if (r.can_push)
-			std::cout << "You push it.\n";
-		else
-			std::cout << "You can't push it.\n";
-	}
-	void operator()(const EventReply r) const {
-		std::cout << r.text << "\n";
-	}
-};
-
-void ProcessReplies(std::shared_ptr<ReplyHandler> reply_handler) {
-	while (!reply_handler->replies.empty()) {
-		std::visit(ReplyVisitor(), reply_handler->replies.front());
-		reply_handler->replies.pop();
-	}
-}
+#include "game_state.h"
 
 int main() {
-	std::ifstream file;
-	file.open("../room.txt", std::ios::in);
-	if (!file)
-		// TODO
-		return 1;
+	auto state = std::make_shared<GameState>();
 
-	auto reply_handler = std::make_shared<ReplyHandler>();
+	std::cout << "Load save [y/N]? ";
+	char c;
+	std::cin >> c;
+	std::cin.ignore();
+	if (c == 'y')
+		state->Load();
+	else
+		state->LoadRoom("../room_start.txt");
 
-	auto room = std::shared_ptr<Room>();
-	try {
-		room = std::make_shared<Room>(reply_handler, std::move(file));
-	} catch (int e) {
-		std::cout << "error on line " << e << "\n";
-		return 1;
-	}
+	state->ProcessReplies();
 
 	while (true) {
 		std::string input;
@@ -82,7 +38,7 @@ int main() {
 				continue;
 		}
 
-		int obj_i = room->SearchFor(obj_name);
+		int obj_i = state->room.SearchFor(obj_name);
 		if (obj_i == -1) {
 			std::cout << "Can't find \"" << obj_name << "\".\n";
 			continue;
@@ -90,17 +46,23 @@ int main() {
 
 		switch (verb) {
 			case Verb::Look:
-				room->objs[obj_i]->DescribeAction();
+				state->room.objs[obj_i]->LookAction();
 				break;
 			case Verb::Open:
-				room->objs[obj_i]->OpenAction();
+				state->room.objs[obj_i]->OpenAction();
 				break;
 			case Verb::Push:
-				room->objs[obj_i]->PushAction();
+				state->room.objs[obj_i]->PushAction();
 				break;
 		}
 
-		ProcessReplies(reply_handler);
+		// user input done; send time action
+		for (auto obj : state->room.objs)
+			obj->TimeStepAction();
+
+		state->ProcessReplies();
+
+		state->Save();
 	}
 
 	return 0;

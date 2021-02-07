@@ -3,15 +3,18 @@
 
 #include "objects.h"
 #include <memory>
+#include <string>
 
 class Room {
 	public:
 		Room();
-		Room(std::shared_ptr<ReplyHandler> reply_handler, std::ifstream file);
+		Room(ReplyHandler& reply_handler, std::ifstream& file);
 		// search room for objects by name. returns index of this.objs or -1 for "not found"
-		int SearchFor(std::string name);
+		int SearchFor(std::string &name);
 		// objects in room
 		std::vector<std::shared_ptr<WorldObj>> objs;
+		// room description
+		std::string description;
 };
 
 #endif
