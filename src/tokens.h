@@ -7,17 +7,17 @@ enum Verb {
 	Look,
 	Open,
 	Push,
+	Enter,
 };
 
-bool TokenizeVerb(std::string& text, Verb& verb);
+bool TokenizeVerb(const std::string& text, Verb& verb);
 
 enum TokenizeResult {
 	Ok,
-	NotEnoughWords,
-	TooManyWords,
 	InvalidVerb,
+	NotASentence,
 };
 
-TokenizeResult Tokenize(std::string& text, Verb& verb, std::string& obj_name);
+TokenizeResult Tokenize(const std::string& text, Verb& verb, std::string& obj_name);
 
 #endif

@@ -27,14 +27,11 @@ int main() {
 		switch (Tokenize(input, verb, obj_name)) {
 			case TokenizeResult::Ok:
 				break;
-			case TokenizeResult::NotEnoughWords:
-				std::cout << "Not enough words.\n";
-				continue;
-			case TokenizeResult::TooManyWords:
-				std::cout << "Too many words.\n";
-				continue;
 			case TokenizeResult::InvalidVerb:
 				std::cout << "Verb not recognized.\n";
+				continue;
+			case TokenizeResult::NotASentence:
+				std::cout << "Not a sentence.\n";
 				continue;
 		}
 
@@ -53,6 +50,9 @@ int main() {
 				break;
 			case Verb::Push:
 				state->room.objs[obj_i]->PushAction();
+				break;
+			case Verb::Enter:
+				state->room.objs[obj_i]->EnterAction();
 				break;
 		}
 

@@ -1,8 +1,10 @@
 #include "room.h"
+#include "objects.h"
 #include <fstream>
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 int Room::SearchFor(std::string& name) {
 	for (unsigned int obj_i = 0; obj_i < this->objs.size(); obj_i++) {
@@ -32,9 +34,11 @@ Room::Room() {};
 
 Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
 	// get room description
+	int line_i = 0;
 	{
 		std::string line;
 		while (std::getline(file, line)) {
+			line_i++;
 			if (line == "EOF")
 				break;
 			description.append(line);
@@ -43,9 +47,23 @@ Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
 		description.pop_back();
 	}
 
+	// TODO
+	//auto o = std::vector<std::shared_ptr<WorldObj>>();
+	//o.push_back(std::make_shared<WorldObj>(reply_handler));
+	//o.push_back(std::make_shared<Container>(reply_handler));
+	//o.push_back(std::make_shared<Button>(reply_handler));
+	//o.push_back(std::make_shared<Light>(reply_handler));
+	//o.push_back(std::make_shared<StartButton>(reply_handler));
+	auto m = std::map<std::string, std::unique_ptr<WorldObj>>();
+	m["obj"] = std::make_unique<WorldObj>(reply_handler);
+	m["container"] = std::make_unique<Container>(reply_handler);
+	m["button"] = std::make_unique<Button>(reply_handler);
+	m["light"] = std::make_unique<Light>(reply_handler);
+	m["start_button"] = std::make_unique<StartButton>(reply_handler);
+	m["door"] = std::make_unique<Door>(reply_handler);
+
 	// load objs
-	std::map<std::string, unsigned int> name_index;
-	int line_i = 0;
+	name_index_type name_index;
 	std::string line;
 	while (std::getline(file, line)) {
 		line_i++;
@@ -63,25 +81,14 @@ Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
 				throw line_i;
 
 			// read name
-			std::string name;
-			ReadWord(line, type_end+2, name);
+			std::string name = line.substr(type_end+2, line.length()-1);
 
 			// add to map
 			name_index[name] = objs.size();
 
 			// add to room
-			if (type == "obj")
-				objs.push_back(std::make_shared<WorldObj>(reply_handler, true, name, ""));
-			else if (type == "container")
-				objs.push_back(std::make_shared<Container>(reply_handler, true, name, ""));
-			else if (type == "button")
-				objs.push_back(std::make_shared<Button>(reply_handler, true, name, ""));
-			else if (type == "light")
-				objs.push_back(std::make_shared<Light>(reply_handler, true, name, ""));
-			else if (type == "start_button")
-				objs.push_back(std::make_shared<StartButton>(reply_handler, true, name, ""));
-			else
-				throw line_i;
+			objs.push_back(m[type]->clone());
+			objs.back()->names.push_back(name);
 		} else {
 			// add properties to last added object
 
@@ -102,28 +109,7 @@ Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
 			std::string value = line.substr(property_end+2, line.length()-1);
 
 			// add property
-			if (property == "name")
-				objs.back()->names.push_back(value);
-			else if (property == "description")
-				objs.back()->description = value;
-			else if (property == "known")
-				objs.back()->is_known = (bool)std::stoi(value);
-			else if (property == "activate_text")
-				// TODO: room.objs.back() *must* be a Light
-				std::dynamic_pointer_cast<Light>(objs.back())->activate_text = value;
-			else if (property == "deactivate_text")
-				// TODO: room.objs.back() *must* be a Light
-				std::dynamic_pointer_cast<Light>(objs.back())->deactivate_text = value;
-			else if (property == "content")
-				// TODO: room.objs.back() *must* be a Container
-				std::dynamic_pointer_cast<Container>(objs.back())->contents.push_back(objs[name_index[value]]);
-			else if (property == "connections")
-				// TODO: room.objs.back() *must* be a Button
-				std::dynamic_pointer_cast<Button>(objs.back())->connections.push_back(objs[name_index[value]]);
-			else if (property == "next_room")
-				// TODO: room.objs.back() *must* be a StartButton
-				std::dynamic_pointer_cast<StartButton>(objs.back())->next_room = value;
-			else
+			if (!objs.back()->AddProperty(property, value, objs, name_index))
 				throw line_i;
 		}
 	}

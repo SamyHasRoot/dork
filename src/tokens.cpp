@@ -1,35 +1,37 @@
+#include <string>
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include <regex>
 
 #include "tokens.h"
 
-bool TokenizeVerb(std::string& text, Verb& verb) {
+bool TokenizeVerb(const std::string& text, Verb& verb) {
 	if (text == "look")
 		verb = Verb::Look;
 	else if (text == "open")
 		verb = Verb::Open;
 	else if (text == "push")
 		verb = Verb::Push;
+	else if (text == "enter")
+		verb = Verb::Enter;
 	else
 		return false;
 
 	return true;
 }
 
-TokenizeResult Tokenize(std::string& text, Verb& verb, std::string& obj_name) {
-	// split on ' ' (also wtf, c++)
-	std::istringstream iss(text);
-	std::vector<std::string> text_vec{std::istream_iterator<std::string>{iss},
-	std::istream_iterator<std::string>{}};
-
-	if (text_vec.size() != 2)
-		return text_vec.size() > 2 ? TooManyWords : NotEnoughWords;
-
-	obj_name = text_vec[1];
-
-	if (!TokenizeVerb(text_vec[0], verb))
-		return TokenizeResult::InvalidVerb;
-
-	return TokenizeResult::Ok;
+TokenizeResult Tokenize(const std::string& text, Verb& verb, std::string& obj_name) {
+	std::smatch matches;
+	if (std::regex_search(text, matches, std::regex(R"foo(^\s*([^\s]+)\s+(?:at )?(?:the\s+)?(.+?)\s*$)foo"))) {
+		std::string _1 = matches[1];
+		if (TokenizeVerb(_1, verb)) {
+			obj_name = matches[2];
+			return TokenizeResult::Ok;
+		} else {
+			return TokenizeResult::InvalidVerb;
+		}
+	} else {
+		return TokenizeResult::NotASentence;
+	}
 }

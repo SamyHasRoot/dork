@@ -1,8 +1,10 @@
 #include <fstream>
+#include <sstream>
 
 #include "tokens.h"
 #include "room.h"
 #include "replies.h"
+#include "objects.h"
 #include "game_state.h"
 
 GameState::GameState() {
@@ -56,6 +58,12 @@ void GameState::ProcessReplies() {
 			},
 			[](RoomLoadedReply r) {
 				std::cout << r.text << "\n";
+			},
+			[](EnterReply r) {
+				if (r.can_enter)
+					std::cout << "You enter it.\n";
+				else
+					std::cout << "You can't enter it.\n";
 			},
 		}, reply_handler.replies.front());
 		reply_handler.replies.pop();

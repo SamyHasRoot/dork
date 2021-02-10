@@ -1,0 +1,6 @@
+Room 2
+You bla bla bla...
+Wow look a door (again)!
+EOF
+door door
+	next_room ../demo_room/dr1.txt

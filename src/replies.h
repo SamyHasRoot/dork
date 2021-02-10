@@ -33,6 +33,10 @@ struct RoomLoadedReply {
 	std::string text;
 };
 
+struct EnterReply {
+	bool can_enter;
+};
+
 class ReplyHandler {
 	public:
 		std::queue<std::variant<
@@ -42,7 +46,8 @@ class ReplyHandler {
 			PushReply,
 			EventReply,
 			LoadRoomReply,
-			RoomLoadedReply
+			RoomLoadedReply,
+			EnterReply
 				>> replies;
 		template <typename T>
 		void Reply(T reply) {

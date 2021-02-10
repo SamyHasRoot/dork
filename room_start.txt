@@ -3,4 +3,4 @@ But there is a button in front of you.
 EOF
 start_button button
 	description A big red button; It has "Start" written on it.
-	next_room ../room_demo.txt
+	next_room ../demo_room/dr1.txt
