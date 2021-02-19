@@ -1,11 +1,55 @@
 #include "tokens.h"
 #include "objects.h"
 #include "room.h"
-
 #include "game_state.h"
+#include <memory>
+#include <string>
+#include <sstream>
+#include <dlfcn.h>
+
+typedef void (*destroy_ptr)(BaseObject *);
+
+std::shared_ptr<BaseObject> Load(std::string file_path) {
+	std::cout << "Loading: " << file_path << "\n";
+
+	void* handle = dlopen(file_path.c_str(), RTLD_LAZY);
+	if (auto e = dlerror()) std::cout << e << "\n";
+	if (auto e = dlerror()) std::cout << e << "\n";
+	if (auto e = dlerror()) std::cout << e << "\n";
+
+	BaseObject* (*create)();
+
+	create = (BaseObject* (*)())dlsym(handle, "create_object");
+	if (auto e = dlerror()) std::cout << e << "\n";
+	if (auto e = dlerror()) std::cout << e << "\n";
+	if (auto e = dlerror()) std::cout << e << "\n";
+	destroy_ptr destroy = (void (*)(BaseObject*))dlsym(handle, "destroy_object");
+	if (auto e = dlerror()) std::cout << e << "\n";
+	if (auto e = dlerror()) std::cout << e << "\n";
+	if (auto e = dlerror()) std::cout << e << "\n";
+
+	BaseObject* obj = (BaseObject*)create();
+	return std::shared_ptr<BaseObject>(obj, destroy);
+}
+
+void LoadToMap(std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj) {
+	auto names = {"container", "door"};
+	for (auto name : names) {
+		std::ostringstream file_path;
+		file_path << "../build/objects/" << name << "/lib" << name << ".so";
+		type_to_obj[name] = Load(file_path.str());
+	}
+}
 
 int main() {
 	auto state = std::make_shared<GameState>();
+
+
+	std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj;
+	type_to_obj["obj"] = std::make_shared<BaseObject>(state->reply_handler);
+	LoadToMap(type_to_obj);
+	state->type_to_obj_map = type_to_obj;
+
 
 	std::cout << "Load save [y/N]? ";
 	char c;

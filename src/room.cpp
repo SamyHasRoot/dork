@@ -32,7 +32,7 @@ unsigned int ReadWord(std::string& input, int start, std::string& out) {
 
 Room::Room() {};
 
-Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
+Room::Room(ReplyHandler& reply_handler, std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj_map, std::ifstream& file) {
 	// get room description
 	int line_i = 0;
 	{
@@ -46,21 +46,6 @@ Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
 		}
 		description.pop_back();
 	}
-
-	// TODO
-	//auto o = std::vector<std::shared_ptr<WorldObj>>();
-	//o.push_back(std::make_shared<WorldObj>(reply_handler));
-	//o.push_back(std::make_shared<Container>(reply_handler));
-	//o.push_back(std::make_shared<Button>(reply_handler));
-	//o.push_back(std::make_shared<Light>(reply_handler));
-	//o.push_back(std::make_shared<StartButton>(reply_handler));
-	auto m = std::map<std::string, std::unique_ptr<WorldObj>>();
-	m["obj"] = std::make_unique<WorldObj>(reply_handler);
-	m["container"] = std::make_unique<Container>(reply_handler);
-	m["button"] = std::make_unique<Button>(reply_handler);
-	m["light"] = std::make_unique<Light>(reply_handler);
-	m["start_button"] = std::make_unique<StartButton>(reply_handler);
-	m["door"] = std::make_unique<Door>(reply_handler);
 
 	// load objs
 	name_index_type name_index;
@@ -87,7 +72,7 @@ Room::Room(ReplyHandler& reply_handler, std::ifstream& file) {
 			name_index[name] = objs.size();
 
 			// add to room
-			objs.push_back(m[type]->clone());
+			objs.push_back(type_to_obj_map[type]->Clone());
 			objs.back()->names.push_back(name);
 		} else {
 			// add properties to last added object
