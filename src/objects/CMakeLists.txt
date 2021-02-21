@@ -1,0 +1,5 @@
+add_subdirectory(container)
+add_subdirectory(button)
+add_subdirectory(light)
+add_subdirectory(start_button)
+add_subdirectory(door)

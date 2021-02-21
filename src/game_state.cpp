@@ -20,7 +20,7 @@ void GameState::LoadRoom(std::string filename) {
 		throw;
 	}
 	try {
-		room = Room(reply_handler, file);
+		room = Room(reply_handler, type_to_obj_map, file);
 	} catch (int e) {
 		std::cerr << "Error on line " << e << "\n";
 		// TODO

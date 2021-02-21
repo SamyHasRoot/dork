@@ -21,6 +21,7 @@ class GameState {
 		Room room;
 		std::string room_filename;
 		ReplyHandler reply_handler;
+		std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj_map;
 };
 
 #endif
