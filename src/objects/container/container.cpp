@@ -3,6 +3,7 @@
 #include <string>
 #include "container_export.h"
 #include "../../objects.h"
+#include "../../objects.cpp"
 #include "../util.h"
 #include <iostream>
 #include <vector>
@@ -18,6 +19,8 @@ class CONTAINER_EXPORT Container : public BaseObject {
 		bool AddProperty(std::string& key, std::string& value, std::vector<std::shared_ptr<BaseObject>> objs, Room::name_index_type& name_index) override;
 		std::unique_ptr<BaseObject> Clone() override;
 };
+
+ADD_CLONE(Container);
 
 void Container::OpenAction() {
 	reply_handler.Reply(OpenReply { .can_open = true });

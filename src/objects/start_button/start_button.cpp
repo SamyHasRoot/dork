@@ -3,6 +3,7 @@
 #include <string>
 #include "start_button_export.h"
 #include "../../objects.h"
+#include "../../objects.cpp"
 #include "../util.h"
 #include <iostream>
 #include <vector>
@@ -16,6 +17,8 @@ class START_BUTTON_EXPORT StartButton : public BaseObject {
 		virtual bool AddProperty(std::string& key, std::string& value, std::vector<std::shared_ptr<BaseObject>> objs, Room::name_index_type& name_index) override;
 		std::unique_ptr<BaseObject> Clone() override;
 };
+
+ADD_CLONE(StartButton);
 
 void StartButton::PushAction() {
 	reply_handler.Reply(PushReply { .can_push = true });

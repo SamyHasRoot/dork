@@ -6,10 +6,11 @@
 #include <string>
 #include <sstream>
 #include <dlfcn.h>
+#include "replies.h"
 
 typedef void (*destroy_ptr)(BaseObject *);
 
-std::shared_ptr<BaseObject> Load(std::string file_path) {
+std::shared_ptr<BaseObject> Load(std::string file_path, ReplyHandler& rp) {
 	std::cout << "Loading: " << file_path << "\n";
 
 	void* handle = dlopen(file_path.c_str(), RTLD_LAZY);
@@ -17,9 +18,9 @@ std::shared_ptr<BaseObject> Load(std::string file_path) {
 	if (auto e = dlerror()) std::cout << e << "\n";
 	if (auto e = dlerror()) std::cout << e << "\n";
 
-	BaseObject* (*create)();
+	BaseObject* (*create)(ReplyHandler&);
 
-	create = (BaseObject* (*)())dlsym(handle, "create_object");
+	create = (BaseObject* (*)(ReplyHandler&))dlsym(handle, "create_object");
 	if (auto e = dlerror()) std::cout << e << "\n";
 	if (auto e = dlerror()) std::cout << e << "\n";
 	if (auto e = dlerror()) std::cout << e << "\n";
@@ -28,16 +29,16 @@ std::shared_ptr<BaseObject> Load(std::string file_path) {
 	if (auto e = dlerror()) std::cout << e << "\n";
 	if (auto e = dlerror()) std::cout << e << "\n";
 
-	BaseObject* obj = (BaseObject*)create();
+	BaseObject* obj = (BaseObject*)create(rp);
 	return std::shared_ptr<BaseObject>(obj, destroy);
 }
 
-void LoadToMap(std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj) {
-	auto names = {"container", "door"};
+void LoadToMap(std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj, ReplyHandler& rp) {
+	auto names = {"button", "container", "door", "light", "start_button"};
 	for (auto name : names) {
 		std::ostringstream file_path;
 		file_path << "../build/objects/" << name << "/lib" << name << ".so";
-		type_to_obj[name] = Load(file_path.str());
+		type_to_obj[name] = Load(file_path.str(), rp);
 	}
 }
 
@@ -47,7 +48,7 @@ int main() {
 
 	std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj;
 	type_to_obj["obj"] = std::make_shared<BaseObject>(state->reply_handler);
-	LoadToMap(type_to_obj);
+	LoadToMap(type_to_obj, state->reply_handler);
 	state->type_to_obj_map = type_to_obj;
 
 
