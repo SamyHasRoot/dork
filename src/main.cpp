@@ -9,8 +9,10 @@
 #include "replies.h"
 #if __has_include(<filesystem>)
 	#include <filesystem>
+	namespace fs = std::filesystem;
 #else
 	#include <experimental/filesystem>
+	namespace fs = std::experimental::filesystem;
 #endif
 
 typedef void (*destroy_ptr)(BaseObject *);
@@ -48,7 +50,7 @@ void LoadToMap(const std::string& base_dir, std::map<std::string, std::shared_pt
 }
 
 int main(int, char *argv[]) {
-	std::filesystem::path base_dir = argv[0];
+	fs::path base_dir = argv[0];
 	base_dir.remove_filename();
 
 	auto state = std::make_shared<GameState>();
