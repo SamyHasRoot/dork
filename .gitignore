@@ -33,6 +33,4 @@
 
 # Build
 build/
-
-# Saves
-save.bin
+install/
