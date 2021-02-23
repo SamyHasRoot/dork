@@ -3,6 +3,7 @@
 
 #include "room.h"
 #include "replies.h"
+#include <string>
 
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -15,8 +16,8 @@ class GameState {
 
 		void ProcessReplies();
 
-		void Save();
-		void Load();
+		void Save(std::string file_path);
+		void Load(std::string file_path);
 
 		Room room;
 		std::string room_filename;

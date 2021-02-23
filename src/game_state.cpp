@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include "tokens.h"
 #include "room.h"
@@ -70,9 +71,9 @@ void GameState::ProcessReplies() {
 	}
 }
 
-void GameState::Save() {
+void GameState::Save(std::string file_path) {
 	std::ofstream file;
-	file.open("../save.bin", std::ios::out | std::ios::trunc | std::ios::binary);
+	file.open(file_path, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open())
 		throw;
 
@@ -91,9 +92,9 @@ void GameState::Save() {
 
 	file.close();
 }
-void GameState::Load() {
+void GameState::Load(std::string file_path) {
 	std::ifstream file;
-	file.open("../save.bin", std::ios::in);
+	file.open(file_path, std::ios::in);
 	if (!file.is_open())
 		throw;
 

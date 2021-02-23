@@ -7,6 +7,7 @@
 #include <sstream>
 #include <dlfcn.h>
 #include "replies.h"
+#include <filesystem>
 
 typedef void (*destroy_ptr)(BaseObject *);
 
@@ -33,22 +34,25 @@ std::shared_ptr<BaseObject> Load(std::string file_path, ReplyHandler& rp) {
 	return std::shared_ptr<BaseObject>(obj, destroy);
 }
 
-void LoadToMap(std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj, ReplyHandler& rp) {
+void LoadToMap(const std::string& base_dir, std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj, ReplyHandler& rp) {
 	auto names = {"button", "container", "door", "light", "start_button"};
 	for (auto name : names) {
 		std::ostringstream file_path;
-		file_path << "../build/objects/" << name << "/lib" << name << ".so";
+		file_path << base_dir << "objects/" << "lib" << name << ".so";
 		type_to_obj[name] = Load(file_path.str(), rp);
 	}
 }
 
-int main() {
-	auto state = std::make_shared<GameState>();
+int main(int, char *argv[]) {
+	std::filesystem::path base_dir = argv[0];
+	base_dir.remove_filename();
 
+	auto state = std::make_shared<GameState>();
 
 	std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj;
 	type_to_obj["obj"] = std::make_shared<BaseObject>(state->reply_handler);
-	LoadToMap(type_to_obj, state->reply_handler);
+
+	LoadToMap(base_dir, type_to_obj, state->reply_handler);
 	state->type_to_obj_map = type_to_obj;
 
 
@@ -57,9 +61,9 @@ int main() {
 	std::cin >> c;
 	std::cin.ignore();
 	if (c == 'y')
-		state->Load();
+		state->Load(base_dir/"saves/save.bin");
 	else
-		state->LoadRoom("../room_start.txt");
+		state->LoadRoom(base_dir/"rooms/room_start.txt");
 
 	state->ProcessReplies();
 
@@ -107,7 +111,7 @@ int main() {
 
 		state->ProcessReplies();
 
-		state->Save();
+		state->Save(base_dir/"saves/save.bin");
 	}
 
 	return 0;
