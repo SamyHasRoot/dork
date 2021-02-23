@@ -7,34 +7,31 @@
 #include <sstream>
 #include <dlfcn.h>
 #include "replies.h"
-#if __has_include(<filesystem>)
-	#include <filesystem>
-	namespace fs = std::filesystem;
-#else
-	#include <experimental/filesystem>
-	namespace fs = std::experimental::filesystem;
-#endif
+#include <filesystem>
+namespace fs = std::filesystem;
 
-typedef void (*destroy_ptr)(BaseObject *);
 
 std::shared_ptr<BaseObject> Load(std::string file_path, ReplyHandler& rp) {
 	std::cout << "Loading: " << file_path << "\n";
 
+#ifdef _WINDOWS
+#include <windows.h>
+	typedef void (__stdcall *destroy_ptr)(BaseObject *);
+	HINSTANCE handle = LoadLibrary(file_path);
+
+	BaseObject* (__stdcall *create)(ReplyHandler&);
+
+	create = (BaseObject* (__stdcall *)(ReplyHandler&))GetProcAddress(hGetProcIDDLL, "create_object");
+	destroy_ptr destroy = (void (__stdcall *)(BaseObject&))GetProcAddress(hGetProcIDDLL, "destroy_object");
+#else
+	typedef void (*destroy_ptr)(BaseObject *);
 	void* handle = dlopen(file_path.c_str(), RTLD_LAZY);
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
 
 	BaseObject* (*create)(ReplyHandler&);
 
 	create = (BaseObject* (*)(ReplyHandler&))dlsym(handle, "create_object");
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
 	destroy_ptr destroy = (void (*)(BaseObject*))dlsym(handle, "destroy_object");
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
+#endif
 
 	BaseObject* obj = (BaseObject*)create(rp);
 	return std::shared_ptr<BaseObject>(obj, destroy);
