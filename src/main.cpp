@@ -7,7 +7,11 @@
 #include <sstream>
 #include <dlfcn.h>
 #include "replies.h"
-#include <filesystem>
+#if __has_include(<filesystem>)
+	#include <filesystem>
+#else
+	#include <experimental/filesystem>
+#endif
 
 typedef void (*destroy_ptr)(BaseObject *);
 
