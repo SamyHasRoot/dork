@@ -5,36 +5,40 @@
 #include <memory>
 #include <string>
 #include <sstream>
-#include <dlfcn.h>
 #include "replies.h"
-#if __has_include(<filesystem>)
-	#include <filesystem>
-	namespace fs = std::filesystem;
-#else
-	#include <experimental/filesystem>
-	namespace fs = std::experimental::filesystem;
-#endif
+#include <filesystem>
+namespace fs = std::filesystem;
 
-typedef void (*destroy_ptr)(BaseObject *);
+#ifdef _WINDOWS
+#include <windows.h>
+#include <stdio.h>
+static const char* kDL_PREFIX = "";
+static const char* kDL_SUFFIX = ".dll";
+#else
+#include <dlfcn.h>
+static const char* kDL_PREFIX = "LIB";
+static const char* kDL_SUFFIX = ".so";
+#endif
 
 std::shared_ptr<BaseObject> Load(std::string file_path, ReplyHandler& rp) {
 	std::cout << "Loading: " << file_path << "\n";
+#ifdef _WINDOWS
+	typedef void (__stdcall *destroy_ptr)(BaseObject *);
+	HINSTANCE handle = LoadLibrary(file_path.c_str());
 
+	BaseObject* (__stdcall *create)(ReplyHandler&);
+
+	create = (BaseObject* (__stdcall *)(ReplyHandler&))GetProcAddress(handle, "create_object");
+	destroy_ptr destroy = (void (__stdcall *)(BaseObject*))GetProcAddress(handle, "destroy_object");
+#else
+	typedef void (*destroy_ptr)(BaseObject *);
 	void* handle = dlopen(file_path.c_str(), RTLD_LAZY);
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
 
 	BaseObject* (*create)(ReplyHandler&);
 
 	create = (BaseObject* (*)(ReplyHandler&))dlsym(handle, "create_object");
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
 	destroy_ptr destroy = (void (*)(BaseObject*))dlsym(handle, "destroy_object");
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
-	if (auto e = dlerror()) std::cout << e << "\n";
+#endif
 
 	BaseObject* obj = (BaseObject*)create(rp);
 	return std::shared_ptr<BaseObject>(obj, destroy);
@@ -44,7 +48,7 @@ void LoadToMap(const std::string& base_dir, std::map<std::string, std::shared_pt
 	auto names = {"button", "container", "door", "light", "start_button"};
 	for (auto name : names) {
 		std::ostringstream file_path;
-		file_path << base_dir << "objects/" << "lib" << name << ".so";
+		file_path << base_dir << "objects/" << kDL_PREFIX << name << kDL_SUFFIX;
 		type_to_obj[name] = Load(file_path.str(), rp);
 	}
 }
@@ -58,7 +62,7 @@ int main(int, char *argv[]) {
 	std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj;
 	type_to_obj["obj"] = std::make_shared<BaseObject>(state->reply_handler);
 
-	LoadToMap(base_dir, type_to_obj, state->reply_handler);
+	LoadToMap(base_dir.string(), type_to_obj, state->reply_handler);
 	state->type_to_obj_map = type_to_obj;
 
 
@@ -67,11 +71,12 @@ int main(int, char *argv[]) {
 	std::cin >> c;
 	std::cin.ignore();
 	if (c == 'y')
-		state->Load(base_dir/"saves/save.bin");
+		state->Load((base_dir/"saves/save.bin").string());
 	else
-		state->LoadRoom(base_dir/"rooms/room_start.txt");
+		state->LoadRoom((base_dir/"rooms/room_start.txt").string());
 
 	state->ProcessReplies();
+
 
 	while (true) {
 		std::string input;
@@ -117,7 +122,7 @@ int main(int, char *argv[]) {
 
 		state->ProcessReplies();
 
-		state->Save(base_dir/"saves/save.bin");
+		state->Save((base_dir/"saves/save.bin").string());
 	}
 
 	return 0;
