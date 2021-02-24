@@ -21,13 +21,13 @@ void GameState::LoadRoom(std::string filename) {
 		throw;
 	}
 	try {
-		room = Room(reply_handler, type_to_obj_map, file);
+		room = Room(type_to_obj_map, file);
 	} catch (int e) {
 		std::cerr << "Error on line " << e << "\n";
 		// TODO
 		throw;
 	}
-	reply_handler.Reply(RoomLoadedReply { .text = room.description });
+	reply_handler.Reply(RoomLoadedReply { /*text: */ room.description });
 }
 
 void GameState::ProcessReplies() {

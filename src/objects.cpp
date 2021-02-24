@@ -16,11 +16,11 @@ BaseObject::BaseObject(ReplyHandler& reply_handler) : reply_handler(reply_handle
 }
 
 void BaseObject::LookAction() {
-	reply_handler.Reply(LookReply { .description = description });
+	reply_handler.Reply(LookReply { /*description: */ description });
 }
 
 void BaseObject::OpenAction() {
-	reply_handler.Reply(OpenReply { .can_open = false });
+	reply_handler.Reply(OpenReply { /*can_open: */ false });
 }
 
 void BaseObject::ContainerOpenedAction() {
@@ -29,15 +29,15 @@ void BaseObject::ContainerOpenedAction() {
 	std::ostringstream ss;
 	ss << "A " << names[0] << ".";
 
-	reply_handler.Reply(ContainerOpenedReply { .text = ss.str() });
+	reply_handler.Reply(ContainerOpenedReply { /*text: */ ss.str() });
 }
 
 void BaseObject::PushAction() {
-	reply_handler.Reply(PushReply { .can_push = false });
+	reply_handler.Reply(PushReply { /*can_push: */ false });
 }
 
 void BaseObject::EnterAction() {
-	reply_handler.Reply(EnterReply { .can_enter = false });
+	reply_handler.Reply(EnterReply { /*can_enter: */ false });
 }
 
 void BaseObject::TimeStepAction() {}

@@ -23,7 +23,7 @@ class BUTTON_EXPORT Button : public BaseObject {
 ADD_CLONE(Button);
 
 void Button::PushAction() {
-	reply_handler.Reply(PushReply { .can_push = true });
+	reply_handler.Reply(PushReply { /*can_push: */ true });
 
 	for (auto obj : connections)
 		obj->ButtonPushedAction();
