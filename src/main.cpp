@@ -16,7 +16,7 @@ static const char* kDL_PREFIX = "";
 static const char* kDL_SUFFIX = ".dll";
 #else
 #include <dlfcn.h>
-static const char* kDL_PREFIX = "LIB";
+static const char* kDL_PREFIX = "lib";
 static const char* kDL_SUFFIX = ".so";
 #endif
 
