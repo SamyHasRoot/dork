@@ -19,8 +19,8 @@ class DOOR_EXPORT Door : public BaseObject {
 ADD_CLONE(Door);
 
 void Door::EnterAction() {
-	reply_handler.Reply(EnterReply { .can_enter = true });
-	reply_handler.Reply(LoadRoomReply { .file = next_room });
+	reply_handler.Reply(EnterReply { /*can_enter: */ true });
+	reply_handler.Reply(LoadRoomReply { /*file: */ next_room });
 }
 bool Door::AddProperty(std::string& key, std::string& value, std::vector<std::shared_ptr<BaseObject>>, Room::name_index_type&) {
 	ADD_STD;

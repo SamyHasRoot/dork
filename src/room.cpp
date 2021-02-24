@@ -32,7 +32,7 @@ unsigned int ReadWord(std::string& input, int start, std::string& out) {
 
 Room::Room() {};
 
-Room::Room(ReplyHandler& reply_handler, std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj_map, std::ifstream& file) {
+Room::Room(std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj_map, std::ifstream& file) {
 	// get room description
 	int line_i = 0;
 	{

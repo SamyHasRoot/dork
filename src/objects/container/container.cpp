@@ -23,7 +23,7 @@ class CONTAINER_EXPORT Container : public BaseObject {
 ADD_CLONE(Container);
 
 void Container::OpenAction() {
-	reply_handler.Reply(OpenReply { .can_open = true });
+	reply_handler.Reply(OpenReply { /*can_open: */ true });
 
 	for (auto obj : contents)
 		obj->ContainerOpenedAction();

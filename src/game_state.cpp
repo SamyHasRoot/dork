@@ -21,13 +21,13 @@ void GameState::LoadRoom(std::string filename) {
 		throw;
 	}
 	try {
-		room = Room(reply_handler, type_to_obj_map, file);
+		room = Room(type_to_obj_map, file);
 	} catch (int e) {
 		std::cerr << "Error on line " << e << "\n";
 		// TODO
 		throw;
 	}
-	reply_handler.Reply(RoomLoadedReply { .text = room.description });
+	reply_handler.Reply(RoomLoadedReply { /*text: */ room.description });
 }
 
 void GameState::ProcessReplies() {
@@ -101,11 +101,12 @@ void GameState::Load(std::string file_path) {
 	uint32_t room_name_size;
 	file.read((char*)&room_name_size, sizeof(uint32_t));
 
-	char room_name[room_name_size+1];
+	char* room_name = new char[room_name_size+1];
 	file.read(room_name, room_name_size);
 	room_name[room_name_size] = (char)NULL;
 
 	LoadRoom(room_name);
+	delete[] room_name;
 
 	int i = 0;
 	while (!file.eof()) {
@@ -114,11 +115,11 @@ void GameState::Load(std::string file_path) {
 		if (file.eof())
 			break;
 
-		char data[size];
-		file.read((char*)&data, size);
+		char* data = new char[size];
+		file.read(data, size);
 
-		char* p = &data[0];
-		room.objs[i]->Load(p, size);
+		room.objs[i]->Load(data, size);
+		delete[] data;
 		i++;
 	}
 }

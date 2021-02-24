@@ -26,9 +26,9 @@ ADD_CLONE(Light);
 void Light::ButtonPushedAction() {
 	state = !state;
 	if (state)
-		reply_handler.Reply(EventReply { .text = activate_text });
+		reply_handler.Reply(EventReply { /*text: */ activate_text });
 	else
-		reply_handler.Reply(EventReply { .text = deactivate_text });
+		reply_handler.Reply(EventReply { /*text: */ deactivate_text });
 }
 
 void Light::Save(std::ostringstream& buf) {

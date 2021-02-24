@@ -21,10 +21,9 @@ class START_BUTTON_EXPORT StartButton : public BaseObject {
 ADD_CLONE(StartButton);
 
 void StartButton::PushAction() {
-	reply_handler.Reply(PushReply { .can_push = true });
-	reply_handler.Reply(EventReply { .text = "A flash of white light emanates from the button, quickly covering the whole room." });
-	reply_handler.Reply(EventReply { .text = "You start feeling dizzy..." });
-	reply_handler.Reply(LoadRoomReply { .file = next_room });
+	reply_handler.Reply(PushReply { /*can_push: */ true });
+	reply_handler.Reply(EventReply { /*text: */ "A flash of white light emanates from the button, quickly covering the whole room.\nYou start feeling dizzy..." });
+	reply_handler.Reply(LoadRoomReply { /*file: */ next_room });
 }
 
 bool StartButton::AddProperty(std::string& key, std::string& value, std::vector<std::shared_ptr<BaseObject>>, Room::name_index_type&) {
