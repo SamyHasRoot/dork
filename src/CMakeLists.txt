@@ -6,7 +6,8 @@ add_executable("dork" "main.cpp" "tokens.cpp" "objects.cpp" "room.cpp" "game_sta
 target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS})
 install(TARGETS ${PROJECT_NAME} DESTINATION ".")
 
-install(DIRECTORY ../rooms DESTINATION ".")
+install(DIRECTORY ../worlds DESTINATION ".")
 install(DIRECTORY DESTINATION saves)
+install(DIRECTORY DESTINATION saves/door_world)
 
 add_subdirectory(objects)
