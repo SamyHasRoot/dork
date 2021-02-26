@@ -3,4 +3,4 @@ You bla bla bla...
 Wow look a door!
 EOF
 door door
-	next_room ../demo_room/dr2.txt
+	next_room dr2.txt

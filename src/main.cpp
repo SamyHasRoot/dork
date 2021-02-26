@@ -9,18 +9,16 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include "file_paths.h"
+
 #ifdef _WINDOWS
 #include <windows.h>
 #include <stdio.h>
-static const char* kDL_PREFIX = "";
-static const char* kDL_SUFFIX = ".dll";
 #else
 #include <dlfcn.h>
-static const char* kDL_PREFIX = "lib";
-static const char* kDL_SUFFIX = ".so";
 #endif
 
-std::shared_ptr<BaseObject> Load(std::string file_path, ReplyHandler& rp) {
+std::shared_ptr<BaseObject> Load(const fs::path& file_path, ReplyHandler& rp) {
 	std::cout << "Loading: " << file_path << "\n";
 #ifdef _WINDOWS
 	typedef void (__stdcall *destroy_ptr)(BaseObject *);
@@ -44,20 +42,21 @@ std::shared_ptr<BaseObject> Load(std::string file_path, ReplyHandler& rp) {
 	return std::shared_ptr<BaseObject>(obj, destroy);
 }
 
-void LoadToMap(const std::string& base_dir, std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj, ReplyHandler& rp) {
+void LoadToMap(const fs::path& base_dir, std::map<std::string, std::shared_ptr<BaseObject>>& type_to_obj, ReplyHandler& rp) {
 	auto names = {"button", "container", "door", "light", "start_button"};
 	for (auto name : names) {
-		std::ostringstream file_path;
-		file_path << base_dir << "objects/" << kDL_PREFIX << name << kDL_SUFFIX;
-		type_to_obj[name] = Load(file_path.str(), rp);
+		std::ostringstream filename;
+		filename << file_paths::kDL_PREFIX << name << file_paths::kDL_SUFFIX;
+		type_to_obj[name] = Load(base_dir/file_paths::kOBJECT_DIR/filename.str(), rp);
 	}
 }
 
 int main(int, char *argv[]) {
+	// TODO: use fs::current_path()
 	fs::path base_dir = argv[0];
 	base_dir.remove_filename();
 
-	auto state = std::make_shared<GameState>();
+	auto state = std::make_shared<GameState>(base_dir);
 
 	std::map<std::string, std::shared_ptr<BaseObject>> type_to_obj;
 	type_to_obj["obj"] = std::make_shared<BaseObject>(state->reply_handler);
@@ -66,14 +65,17 @@ int main(int, char *argv[]) {
 	state->type_to_obj_map = type_to_obj;
 
 
+	state->LoadWorld("door_world");
+
+
 	std::cout << "Load save [y/N]? ";
 	char c;
 	std::cin >> c;
 	std::cin.ignore();
 	if (c == 'y')
-		state->Load((base_dir/"saves/save.bin").string());
+		state->ReadSave();
 	else
-		state->LoadRoom((base_dir/"rooms/room_start.txt").string());
+		state->LoadRoom("start.txt");
 
 	state->ProcessReplies();
 
@@ -122,7 +124,7 @@ int main(int, char *argv[]) {
 
 		state->ProcessReplies();
 
-		state->Save((base_dir/"saves/save.bin").string());
+		state->WriteSave();
 	}
 
 	return 0;
