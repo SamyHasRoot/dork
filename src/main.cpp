@@ -22,7 +22,7 @@ std::shared_ptr<BaseObject> Load(const fs::path& file_path, ReplyHandler& rp) {
 	std::cout << "Loading: " << file_path << "\n";
 #ifdef _WINDOWS
 	typedef void (__stdcall *destroy_ptr)(BaseObject *);
-	HINSTANCE handle = LoadLibrary(file_path.c_str());
+	HINSTANCE handle = LoadLibrary(file_path.string().c_str());
 
 	BaseObject* (__stdcall *create)(ReplyHandler&);
 
