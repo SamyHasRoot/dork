@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -9,6 +10,7 @@
 #include "objects.h"
 #include "game_state.h"
 #include "file_paths.h"
+#include "files.h"
 
 GameState::GameState(const fs::path& base_dir) {
 	reply_handler = ReplyHandler();
@@ -93,7 +95,7 @@ void GameState::WriteSave() {
 		// TODO
 		throw;
 	}
-	save_info_file << room_filename;
+	WriteFile(save_info_file, room_filename.c_str(), room_filename.length());
 	save_info_file.close();
 
 
@@ -108,11 +110,8 @@ void GameState::WriteSave() {
 	for (auto obj : room.objs) {
 		auto data = std::ostringstream();
 		obj->Save(data);
-		{
-			uint32_t t = data.str().length();
-			room_file.write((char*)&t, sizeof(uint32_t));
-		}
-		room_file.write(data.str().c_str(), data.str().length());
+		auto data_str = data.str();
+		WriteFile(room_file, data_str.c_str(), data.str().length());
 	}
 
 	room_file.close();
@@ -128,9 +127,14 @@ void GameState::ReadSave() {
 		// TODO
 		throw;
 	}
-	std::getline(save_info_file, room_filename);
+	std::unique_ptr<char, std::function<void(void*)>> data;
+	uint32_t size = ReadFile(save_info_file, data);
+	room_filename.assign(data.get(), data.get()+size);
+
 	save_info_file.close();
 
+
+	LoadRoom(room_filename);
 
 	std::ifstream file;
 	file.open(save_path/room_filename, std::ios::in);
@@ -140,21 +144,13 @@ void GameState::ReadSave() {
 		throw;
 	}
 
-	LoadRoom(room_filename);
-
-	int i = 0;
-	while (!file.eof()) {
-		uint32_t size;
-		file.read((char*)&size, sizeof(uint32_t));
-		if (file.eof())
+	for (auto obj : room.objs) {
+		std::unique_ptr<char, std::function<void(void*)>> data;
+		uint32_t size = ReadFile(file, data);
+		if (size == 0 && data.get() == nullptr)
 			break;
 
-		char* data = new char[size];
-		file.read(data, size);
-
-		room.objs[i]->Load(data, size);
-		delete[] data;
-		i++;
+		auto _1 = data.get();
+		obj->Load(_1, size);
 	}
 }
-

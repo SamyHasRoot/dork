@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 
 int Room::SearchFor(std::string& name) {
 	for (unsigned int obj_i = 0; obj_i < this->objs.size(); obj_i++) {
