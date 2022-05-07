@@ -1,8 +1,3 @@
 # dork
-Text adventure stuff.
-## TODO
-
-- [x] Make project open source.
-- [x] Add modding system for adding more objects (via so/dll).
-- [ ] Comment code.
-- [ ] Make sure loading a invalid room won't segfault.
+A barely functional text adventure engine.
+Please don't try to use this.
